@@ -1,16 +1,50 @@
 namespace SpriteKind {
     export const weapon = SpriteKind.create()
     export const PowerUp = SpriteKind.create()
+    export const ufo = SpriteKind.create()
 }
-controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-	
+mp.onButtonEvent(mp.MultiplayerButton.A, ControllerButtonEvent.Pressed, function (player2) {
+    if (0 < AMMO.value) {
+        AMMO.value += -1
+        zapper = sprites.createProjectileFromSide(assets.image`myImage0`, 50, 50)
+        zapper.setPosition(mp.getPlayerSprite(mp.playerSelector(mp.PlayerNumber.One)).x, mp.getPlayerSprite(mp.playerSelector(mp.PlayerNumber.One)).y)
+        zapper.setVelocity(0, -50)
+        music.play(music.createSoundEffect(WaveShape.Square, 5000, 1, 255, 0, 250, SoundExpressionEffect.None, InterpolationCurve.Logarithmic), music.PlaybackMode.InBackground)
+    }
 })
-sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Projectile, function (sprite, otherSprite) {
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.ufo, function (sprite, otherSprite) {
     sprites.destroy(sprite)
     sprites.destroy(otherSprite)
 })
-let More_AMMO: Sprite = null
+sprites.onDestroyed(SpriteKind.ufo, function (sprite) {
+    UFO_amount += -1
+})
+function UFO_Spawn () {
+    Level += 1
+    for (let index = 0; index < Level; index++) {
+        UFO = sprites.createProjectileFromSide(assets.image`myImage2`, 0, 0)
+        UFO.setPosition(randint(1, 159), 13)
+        UFO.setKind(SpriteKind.ufo)
+    }
+    UFO_amount = Level
+    SongLibrary()
+}
+function SongLibrary () {
+    music.stopAllSounds()
+    if (Level < 4) {
+        music.play(music.createSong(assets.song`1st Song`), music.PlaybackMode.InBackground)
+    }
+    if (Level < 6) {
+    	
+    }
+}
 let zapper: Sprite = null
+let UFO: Sprite = null
+let AMMO: StatusBarSprite = null
+let UFO_amount = 0
+let Level = 0
+Level = 1
+UFO_amount = 1
 mp.setPlayerSprite(mp.playerSelector(mp.PlayerNumber.One), sprites.create(assets.image`myImage`, SpriteKind.Player))
 mp.setPlayerSprite(mp.playerSelector(mp.PlayerNumber.Two), sprites.create(assets.image`myImage3`, SpriteKind.Player))
 mp.moveWithButtons(mp.playerSelector(mp.PlayerNumber.One))
@@ -141,45 +175,56 @@ scene.setBackgroundImage(img`
     ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
     ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
     `)
-let AMMO = statusbars.create(20, 4, StatusBarKind.Health)
+AMMO = statusbars.create(20, 4, StatusBarKind.Health)
 AMMO.setColor(2, 15, 1)
 AMMO.setLabel("Ammo")
 AMMO.setStatusBarFlag(StatusBarFlag.LabelAtEnd, true)
 AMMO.setStatusBarFlag(StatusBarFlag.SmoothTransition, true)
 AMMO.setPosition(23, 5)
 AMMO.max = 10
-let UFO = sprites.createProjectileFromSide(assets.image`myImage2`, 0, 0)
+UFO = sprites.createProjectileFromSide(assets.image`myImage2`, 0, 0)
 UFO.setPosition(67, 13)
+UFO.setKind(SpriteKind.ufo)
 mp.setPlayerIndicatorsVisible(true)
-forever(function () {
-    if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.One), mp.MultiplayerButton.A)) {
-        if (0 < AMMO.value) {
-            AMMO.value += -1
-            zapper = sprites.createProjectileFromSide(assets.image`myImage0`, 50, 50)
-            zapper.setPosition(mp.getPlayerSprite(mp.playerSelector(mp.PlayerNumber.One)).x, mp.getPlayerSprite(mp.playerSelector(mp.PlayerNumber.One)).y)
-            zapper.setVelocity(0, -50)
-        }
-    }
-    if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.A)) {
-        if (0 < AMMO.value) {
-            AMMO.value += -1
-            zapper = sprites.createProjectileFromSide(assets.image`myImage0`, 50, 50)
-            zapper.setPosition(mp.getPlayerSprite(mp.playerSelector(mp.PlayerNumber.Two)).x, mp.getPlayerSprite(mp.playerSelector(mp.PlayerNumber.Two)).y)
-            zapper.setVelocity(0, -50)
-        }
-    }
-})
+SongLibrary()
+let More_AMMO = sprites.createProjectileFromSide(assets.image`myImage1`, 0, 50)
+sprites.destroy(More_AMMO)
+let projectile = sprites.createProjectileFromSide(assets.image`myImage6`, 0, 100)
+sprites.destroy(projectile)
 forever(function () {
     if (More_AMMO.overlapsWith(mp.getPlayerSprite(mp.playerSelector(mp.PlayerNumber.One)))) {
         AMMO.value += 5
         sprites.destroy(More_AMMO)
     }
-    if (More_AMMO.overlapsWith(mp.getPlayerSprite(mp.playerSelector(mp.PlayerNumber.Two)))) {
+    if (More_AMMO.overlapsWith(mp.getPlayerSprite(mp.playerSelector(mp.PlayerNumber.One)))) {
         AMMO.value += 5
         sprites.destroy(More_AMMO)
+    }
+    if (projectile.overlapsWith(mp.getPlayerSprite(mp.playerSelector(mp.PlayerNumber.One)))) {
+        sprites.destroy(mp.getPlayerSprite(mp.playerSelector(mp.PlayerNumber.One)))
+    }
+    if (UFO_amount == 0) {
+        UFO_Spawn()
     }
 })
 game.onUpdateInterval(3000, function () {
     More_AMMO = sprites.createProjectileFromSide(assets.image`myImage1`, 0, 50)
     More_AMMO.x = randint(0, 160)
+    if (0 < UFO_amount) {
+        for (let index = 0; index < Level; index++) {
+            projectile = sprites.createProjectileFromSprite(assets.image`myImage6`, UFO, 0, 100)
+            projectile.setPosition(UFO.x, UFO.y + 10)
+            projectile.setKind(SpriteKind.Enemy)
+            music.play(music.createSoundEffect(
+            WaveShape.Sine,
+            5000,
+            0,
+            255,
+            0,
+            500,
+            SoundExpressionEffect.None,
+            InterpolationCurve.Linear
+            ), music.PlaybackMode.InBackground)
+        }
+    }
 })
