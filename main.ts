@@ -47,8 +47,8 @@ Level = 1
 UFO_amount = 1
 mp.setPlayerSprite(mp.playerSelector(mp.PlayerNumber.One), sprites.create(assets.image`myImage`, SpriteKind.Player))
 mp.setPlayerSprite(mp.playerSelector(mp.PlayerNumber.Two), sprites.create(assets.image`myImage3`, SpriteKind.Player))
-mp.moveWithButtons(mp.playerSelector(mp.PlayerNumber.One))
-mp.moveWithButtons(mp.playerSelector(mp.PlayerNumber.Two))
+mp.moveWithButtons(mp.playerSelector(mp.PlayerNumber.One), 100, 0)
+mp.moveWithButtons(mp.playerSelector(mp.PlayerNumber.Two), 100, 0)
 mp.getPlayerSprite(mp.playerSelector(mp.PlayerNumber.One)).setPosition(78, 91)
 mp.getPlayerSprite(mp.playerSelector(mp.PlayerNumber.Two)).setPosition(103, 91)
 mp.getPlayerSprite(mp.playerSelector(mp.PlayerNumber.One)).setFlag(SpriteFlag.StayInScreen, true)
